@@ -1,6 +1,6 @@
 from urllib.parse import urljoin
 
-# from aiogram.contrib.middlewares.logging import LoggingMiddleware
+from aiogram.contrib.middlewares.logging import LoggingMiddleware
 # from aiogram.types import Update
 # from flask import request, Flask
 
@@ -12,6 +12,7 @@ import os
 
 from aiogram import Bot, Dispatcher, executor, types
 from aiogram.utils.executor import start_webhook
+from aiogram.dispatcher.webhook import SendMessage
 
 # import aiohttp
 # from aiohttp import web
@@ -36,7 +37,7 @@ logging.basicConfig(level=logging.INFO)
 bot = Bot(token=API_TOKEN, proxy=PROXY) if LOCAL_MODE else Bot(API_TOKEN)
 User.bot = bot
 dp = Dispatcher(bot)
-# dp.middleware.setup(LoggingMiddleware())
+dp.middleware.setup(LoggingMiddleware())
 # updates = {}
 # app = None
 
@@ -57,7 +58,8 @@ async def handle_message(message: types.Message):
     user = User.identification(message.from_user.id)
     if message.message_id != user.control_message_id:
         await bot.delete_message(user.account_id, message.message_id)
-    await process_update(user, message)
+    # await process_update(user, message)
+    return SendMessage(message.chat.id, message.text)
 
 
 @dp.callback_query_handler()
@@ -91,9 +93,10 @@ async def on_shutdown(d):
 #             await dp.process_update(update)
 #         return "OK", 200
 
-async def main():
+
+if __name__ == '__main__':
     logging.info('Запуск приложения..')
-    await bot.send_message(ADMIN_ID, 'Запуск приложения')
+    # SendMessage(ADMIN_ID, 'Запуск приложения')
     if CONNECTION_TYPE == 'polling':
         logging.info('Вариант подключения: polling.')
         executor.start_polling(dp, skip_updates=True)
@@ -112,7 +115,3 @@ async def main():
             host='0.0.0.0',
             port=5000)
         # app.run(host="0.0.0.0", port=5000)
-
-
-if __name__ == '__main__':
-    main()
