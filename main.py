@@ -1,5 +1,7 @@
 from urllib.parse import urljoin
 
+from aiogram.contrib.middlewares.logging import LoggingMiddleware
+
 from bot_types import User
 from rooms import rooms
 
@@ -8,6 +10,13 @@ import os
 
 from aiogram import Bot, Dispatcher, executor, types
 from aiogram.utils.executor import start_webhook
+
+# import aiohttp
+# from aiohttp import web
+# from aiogram import Bot, Dispatcher, types
+# from aiogram.utils import context
+# from aiogram.dispatcher.webhook import get_new_configured_app
+# from lxml import etree
 
 
 API_TOKEN = os.environ.get('API_TOKEN')
@@ -24,6 +33,7 @@ logging.basicConfig(level=logging.INFO)
 bot = Bot(token=API_TOKEN, **dict(proxy=PROXY) if LOCAL_MODE else {})
 User.bot = bot
 dp = Dispatcher(bot)
+dp.middleware.setup(LoggingMiddleware())
 
 
 async def process_update(user, message, callback_data=None):
@@ -33,7 +43,7 @@ async def process_update(user, message, callback_data=None):
 
 @dp.message_handler()
 async def handle_message(message: types.Message):
-    print('handle message')
+    logging.info(f'Получено сообщение от {message.from_user.id}')
     user = User.identification(message.from_user.id)
     if message.message_id != user.control_message_id:
         await bot.delete_message(user.account_id, message.message_id)
@@ -42,7 +52,7 @@ async def handle_message(message: types.Message):
 
 @dp.callback_query_handler()
 async def callback_handler(messages: types.CallbackQuery):
-    print('handle callback query')
+    logging.info(f'Полученн callback от {messages.from_user.id}')
     user = User.identification(messages.from_user.id)
 
     await process_update(user, messages.message, messages.data)
@@ -62,9 +72,16 @@ async def on_shutdown(d):
 
 
 if __name__ == '__main__':
+    logging.info('Запуск приложения..')
     if CONNECTION_TYPE == 'polling':
+        logging.info('Вариант подключения: polling.')
         executor.start_polling(dp, skip_updates=True)
     elif CONNECTION_TYPE == 'webhook':
+        logging.info('Вариант подключения: webhook.')
+        # app = get_new_configured_app(dispatcher=dp, path=WEBHOOK_URL)
+        # app.on_startup.append(on_startup)
+        # dp.loop.set_task_factory(context.task_factory)
+        # web.run_app(app, host='0.0.0.0', port=os.getenv('PORT'))
         start_webhook(
             dispatcher=dp,
             webhook_path=WEBHOOK_PATH,
