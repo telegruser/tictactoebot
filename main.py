@@ -1,8 +1,8 @@
 from urllib.parse import urljoin
 
 # from aiogram.contrib.middlewares.logging import LoggingMiddleware
-from aiogram.types import Update
-from flask import request, Flask
+# from aiogram.types import Update
+# from flask import request, Flask
 
 from bot_types import User
 from rooms import rooms
@@ -33,7 +33,7 @@ PROXY = os.environ.get('PROXY', 'socks5://127.0.0.1:9150')  # Tor proxy
 ADMIN_ID = int(os.environ.get('ADMIN_ID'))
 
 logging.basicConfig(level=logging.INFO)
-bot = Bot(token=API_TOKEN, **dict(proxy=PROXY) if LOCAL_MODE else {})
+bot = Bot(token=API_TOKEN, proxy=PROXY) if LOCAL_MODE else Bot(API_TOKEN)
 User.bot = bot
 dp = Dispatcher(bot)
 # dp.middleware.setup(LoggingMiddleware())
