@@ -167,6 +167,7 @@ class Board:
         self._board = self.make_board(count) if board is None else board
         self.count = count
         self.step_number = 1
+        self.series = 3 if count == 3 else 4
 
     @property
     def copy(self):
@@ -240,14 +241,13 @@ class Board:
             lst.append(self._board[x+i][y+i])
         return self._check_list(lst, value)
 
-    @staticmethod
-    def _check_list(lst, value):
+    def _check_list(self, lst, value):
         # print(lst)
         count = 0
         for item in lst:
             if item == value:
                 count += 1
-            if count == 3:
+            if count >= self.series:
                 return True
             if item != value:
                 count = 0
