@@ -46,11 +46,11 @@ async def callback_handler(messages: types.CallbackQuery):
     await process_update(user, messages.message, messages.data)
 
 
-async def on_startup():
+async def on_startup(d):
     await bot.set_webhook(WEBHOOK_URL)
 
 
-async def on_shutdown():
+async def on_shutdown(d):
     logging.warning('Завершение приложения..')
     await bot.delete_webhook()
     await dp.storage.close()
