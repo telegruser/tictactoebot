@@ -23,13 +23,14 @@ from aiogram import Bot, Dispatcher, executor, types
 
 API_TOKEN = os.environ.get('API_TOKEN')
 WEBHOOK_HOST = os.environ.get('WEBHOOK_HOST')
-WEBHOOK_PATH = '/webhook/' + API_TOKEN
-WEBHOOK_URL = urljoin(WEBHOOK_HOST, WEBHOOK_PATH)
+# WEBHOOK_PATH = '/webhook/' + API_TOKEN
+WEBHOOK_URL = WEBHOOK_HOST + API_TOKEN
 # WEBAPP_HOST = os.environ.get('WEBAPP_HOST')
 # WEBAPP_PORT = int(os.environ.get('WEBAPP_PORT'))
 LOCAL_MODE = bool(int(os.environ.get('LOCAL_MODE', '0')))
 CONNECTION_TYPE = 'polling' if LOCAL_MODE else 'webhook'
 PROXY = os.environ.get('PROXY', 'socks5://127.0.0.1:9150')  # Tor proxy
+ADMIN_ID = int(os.environ.get('ADMIN_ID'))
 
 logging.basicConfig(level=logging.INFO)
 bot = Bot(token=API_TOKEN, **dict(proxy=PROXY) if LOCAL_MODE else {})
@@ -75,8 +76,8 @@ async def on_startup(d):
 async def on_shutdown(d):
     logging.warning('Завершение приложения..')
     await bot.delete_webhook()
-    await dp.storage.close()
-    await dp.storage.wait_closed()
+    # await dp.storage.close()
+    # await dp.storage.wait_closed()
     logging.warning('Завершено')
 
 
@@ -111,3 +112,4 @@ if __name__ == '__main__':
         #     host=WEBAPP_HOST,
         #     port=WEBAPP_PORT,)
         app.run(host="0.0.0.0", port=int(os.environ.get('PORT', 5000)))
+    await bot.send_message(ADMIN_ID, 'Приложение запущено')
