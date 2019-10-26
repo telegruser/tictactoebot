@@ -24,12 +24,13 @@ from aiogram.dispatcher.webhook import SendMessage
 
 API_TOKEN = os.environ.get('API_TOKEN')
 WEBHOOK_HOST = os.environ.get('WEBHOOK_HOST')
-WEBHOOK_PATH = '/' + API_TOKEN
 WEBHOOK_URL = WEBHOOK_HOST + API_TOKEN
 # WEBAPP_HOST = os.environ.get('WEBAPP_HOST')
 # WEBAPP_PORT = int(os.environ.get('WEBAPP_PORT'))
 LOCAL_MODE = bool(int(os.environ.get('LOCAL_MODE', '0')))
-CONNECTION_TYPE = 'polling' if LOCAL_MODE else 'webhook'
+CONNECTION_TYPE = os.environ.get('CONNECTION_TYPE', None)
+if not CONNECTION_TYPE:
+    CONNECTION_TYPE = 'polling' if LOCAL_MODE else 'webhook'
 PROXY = os.environ.get('PROXY', 'socks5://127.0.0.1:9150')  # Tor proxy
 ADMIN_ID = int(os.environ.get('ADMIN_ID'))
 
@@ -108,7 +109,7 @@ if __name__ == '__main__':
         # web.run_app(app, host='0.0.0.0', port=os.getenv('PORT'))
         start_webhook(
             dispatcher=dp,
-            webhook_path=WEBHOOK_PATH,
+            webhook_path=WEBHOOK_URL,
             on_startup=on_startup,
             on_shutdown=on_shutdown,
             skip_updates=True,
