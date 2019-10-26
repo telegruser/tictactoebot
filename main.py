@@ -1,3 +1,5 @@
+from urllib.parse import urljoin
+
 from bot_types import User
 from rooms import rooms
 
@@ -10,8 +12,8 @@ from aiogram.utils.executor import start_webhook
 
 API_TOKEN = os.environ.get('API_TOKEN')
 WEBHOOK_HOST = os.environ.get('WEBHOOK_HOST')
-WEBHOOK_PATH = os.environ.get('WEBHOOK_PATH')
-WEBHOOK_URL = f"{WEBHOOK_HOST}{WEBHOOK_PATH}"
+WEBHOOK_PATH = '/webhook/' + API_TOKEN
+WEBHOOK_URL = urljoin(WEBHOOK_HOST, WEBHOOK_PATH)
 WEBAPP_HOST = os.environ.get('WEBAPP_HOST')
 WEBAPP_PORT = int(os.environ.get('WEBAPP_PORT'))
 LOCAL_MODE = bool(int(os.environ.get('LOCAL_MODE', '0')))
@@ -47,6 +49,7 @@ async def callback_handler(messages: types.CallbackQuery):
 
 
 async def on_startup(d):
+    await bot.delete_webhook()
     await bot.set_webhook(WEBHOOK_URL)
 
 
