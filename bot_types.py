@@ -242,7 +242,7 @@ class Board:
 
     @staticmethod
     def _check_list(lst, value):
-        print(lst)
+        # print(lst)
         count = 0
         for item in lst:
             if item == value:
@@ -325,6 +325,7 @@ class Game:
         self.creator_queue = None
         self.creator: User = user
         self.players_queue = {}
+        self.game_over = False
         user.game = self
         self.waiting_partner = False
 
@@ -355,9 +356,12 @@ class Game:
         """
         if self.board.set(x, y, self.queue):
             self.winner = self.queue
+            self.game_over = True
         elif len(self.board.legal_moves) == 0:
             self.winner = 0
-        self.queue_reverse()
+            self.game_over = True
+        else:
+            self.queue_reverse()
         if self.winner is not None:
             if self.winner == 0:
                 return self.winner

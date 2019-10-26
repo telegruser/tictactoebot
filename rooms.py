@@ -35,6 +35,19 @@ async def rooms(user: User):
 
     elif user.button == ReplyKeyboardButtons.Cancel:
         # Глобальная кнопка возврата в меню
+        game = user.game
+        if game is not None:
+            user1, user2 = user.game.players_queue.values()
+            if user1 == user:
+                partner = user2
+            else:
+                partner = user1
+            if partner != 'pc':
+                game.winner = partner.game_queue
+                await user_to_room(partner, Rooms.GameFinish)
+            else:
+                game.winner = -1
+            return await user_to(Rooms.GameFinish)
         return await user_to(Rooms.MenuSingleMultiPlayer)
 
     # Комната настройки размера поля
@@ -122,28 +135,31 @@ async def rooms(user: User):
             game = user.game
             # Если игра завершена с победой
             if user.game_queue == game.winner:
-                await user.show_control_message(
-                    'Победа!',
-                    'Поздравляем, вы выйграли!',
-                    make_inline_keyboard_from_board(user.game.board),
-                    icon=Icons.Cup,
-                    breaking=True)
+                title = 'Победа'
+                icon = Icons.Cup
+                text = 'Поздравляем, вы выйграли!' if game.game_over else 'Противник сдался.'
+            # Если ничья
             elif game.winner == 0:
-                await user.show_control_message(
-                    'Ничья.',
-                    'Победила дружба.',
-                    make_inline_keyboard_from_board(user.game.board),
-                    icon=Icons.OK,
-                    breaking=True)
+                title = 'Ничья'
+                icon = Icons.OK
+                text = 'Победила дружба.'
+            # Если поражение
             else:
-                await user.show_control_message(
-                    'Поражение.',
-                    'Повезет в следующий раз!',
-                    make_inline_keyboard_from_board(user.game.board),
-                    icon=Icons.Shrugging,
-                    breaking=True)
+                title = 'Поражение.'
+                icon = Icons.Shrugging
+                text = 'Повезет в следующий раз!' if game.game_over else 'Вы отключлись от игры.'
+
+            await user.show_control_message(
+                title,
+                text,
+                make_inline_keyboard_from_board(user.game.board),
+                icon=icon,
+                new=True,
+                breaking=True)
+
             if game in games:
                 games.remove(game)
+
             user.game = None
             await user_to(Rooms.MenuSingleMultiPlayer)
 
@@ -166,14 +182,14 @@ async def rooms(user: User):
             game = user.game
             if game.queue == user.game_queue:
                 # Если сейчас его ход:
-                await user.show_control_message(f'Ход {game.step_number}',
+                await user.show_control_message(f'Ваш ход.. Ход №{game.step_number}',
                                                 f'Ваш знак: {game.user_symbol(user)}\n\nВаша очередь..',
-                                                make_inline_keyboard_from_board(user.game.board))
+                                                make_inline_keyboard_from_board(user.game.board), Icons.Baloon)
             else:
                 # Если сейчас ходит противник:
-                await user.show_control_message(f'Ход {game.step_number}',
-                                                f'Ваш знак: {game.user_symbol(user)}\n\nОчередь соперника.',
-                                                make_inline_keyboard_from_board(user.game.board))
+                await user.show_control_message(f'Ход соперника.. Ход №{game.step_number}',
+                                                f'Ваш знак: {game.user_symbol(user)}\n\nСоперник ходит..',
+                                                make_inline_keyboard_from_board(user.game.board), Icons.Wait)
 
         elif user.state == RoomUserStatus.PressedInlineButton:
 
