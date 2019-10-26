@@ -60,8 +60,8 @@ async def handle_message(message: types.Message):
     user = User.identification(message.from_user.id)
     if message.message_id != user.control_message_id:
         await bot.delete_message(user.account_id, message.message_id)
-    # await process_update(user, message)
-    return SendMessage(message.chat.id, message.text)
+    await process_update(user, message)
+    # return SendMessage(message.chat.id, message.text)
 
 
 @dp.callback_query_handler()
