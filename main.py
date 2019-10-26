@@ -1,4 +1,4 @@
-from urllib.parse import urljoin
+# from urllib.parse import urljoin
 
 from aiogram.contrib.middlewares.logging import LoggingMiddleware
 # from aiogram.types import Update
@@ -80,8 +80,8 @@ async def on_startup(d):
 async def on_shutdown(d):
     logging.warning('Завершение приложения..')
     await bot.delete_webhook()
-    # await dp.storage.close()
-    # await dp.storage.wait_closed()
+    await dp.storage.close()
+    await dp.storage.wait_closed()
     logging.warning('Завершено')
 
 
