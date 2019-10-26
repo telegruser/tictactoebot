@@ -165,9 +165,13 @@ class Board:
 
     def __init__(self, count, board=None):
         self._board = self.make_board(count) if board is None else board
+        self.is_clone = False if board is None else True
         self.count = count
         self.step_number = 1
         self.series = 3 if count == 3 else 4
+        if not self.is_clone:
+            print('count =', count)
+            print('series =', self.series)
 
     @property
     def copy(self):
@@ -210,28 +214,40 @@ class Board:
         for x in range(self.count-2):
             diagonal = []
             for y in range(self.count-x):
-                diagonal.append(self._board[x+y][y])
+                xx = x + y
+                yy = y
+                val = self._board[xx][yy]
+                diagonal.append(val)
             if self._check_list(diagonal, value):
                 return True
 
         for y in range(1, self.count - 2):
             diagonal = []
             for x in range(self.count - y):
-                diagonal.append(self._board[x][y+x])
+                xx = x
+                yy = x + y
+                val = self._board[xx][yy]
+                diagonal.append(val)
             if self._check_list(diagonal, value):
                 return True
 
         for x0 in range(self.count-2):
             diagonal = []
             for y0 in range(self.count-x0):
-                diagonal.append(self._board[self.count-x0-y0-1][y0])
+                xx = self.count - x0 - y0 - 1
+                yy = y0
+                val = self._board[xx][yy]
+                diagonal.append(val)
             if self._check_list(diagonal, value):
                 return True
 
         for y0 in range(1, self.count-2):
             diagonal = []
             for x0 in range(self.count-y0):
-                diagonal.append(self._board[self.count-x0-1][self.count-y0-x0])
+                xx = self.count - x0 - 1
+                yy = self.count - y0 - x0
+                val = self._board[xx][yy]
+                diagonal.append(val)
             if self._check_list(diagonal, value):
                 return True
 
@@ -242,7 +258,6 @@ class Board:
         return self._check_list(lst, value)
 
     def _check_list(self, lst, value):
-        # print(lst)
         count = 0
         for item in lst:
             if item == value:
