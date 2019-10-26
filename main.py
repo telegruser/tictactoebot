@@ -1,6 +1,8 @@
 from urllib.parse import urljoin
 
-from aiogram.contrib.middlewares.logging import LoggingMiddleware
+# from aiogram.contrib.middlewares.logging import LoggingMiddleware
+from aiogram.types import Update
+from flask import request, Flask
 
 from bot_types import User
 from rooms import rooms
@@ -9,7 +11,7 @@ import logging
 import os
 
 from aiogram import Bot, Dispatcher, executor, types
-from aiogram.utils.executor import start_webhook
+# from aiogram.utils.executor import start_webhook
 
 # import aiohttp
 # from aiohttp import web
@@ -23,8 +25,8 @@ API_TOKEN = os.environ.get('API_TOKEN')
 WEBHOOK_HOST = os.environ.get('WEBHOOK_HOST')
 WEBHOOK_PATH = '/webhook/' + API_TOKEN
 WEBHOOK_URL = urljoin(WEBHOOK_HOST, WEBHOOK_PATH)
-WEBAPP_HOST = os.environ.get('WEBAPP_HOST')
-WEBAPP_PORT = int(os.environ.get('WEBAPP_PORT'))
+# WEBAPP_HOST = os.environ.get('WEBAPP_HOST')
+# WEBAPP_PORT = int(os.environ.get('WEBAPP_PORT'))
 LOCAL_MODE = bool(int(os.environ.get('LOCAL_MODE', '0')))
 CONNECTION_TYPE = 'polling' if LOCAL_MODE else 'webhook'
 PROXY = os.environ.get('PROXY', 'socks5://127.0.0.1:9150')  # Tor proxy
@@ -33,7 +35,14 @@ logging.basicConfig(level=logging.INFO)
 bot = Bot(token=API_TOKEN, **dict(proxy=PROXY) if LOCAL_MODE else {})
 User.bot = bot
 dp = Dispatcher(bot)
-dp.middleware.setup(LoggingMiddleware())
+# dp.middleware.setup(LoggingMiddleware())
+updates = {}
+app = None
+
+
+if CONNECTION_TYPE == 'webhook':
+    app = Flask(__name__) if CONNECTION_TYPE == 'webhook' else None
+    app.logger.disabled = True
 
 
 async def process_update(user, message, callback_data=None):
@@ -71,6 +80,17 @@ async def on_shutdown(d):
     logging.warning('Завершено')
 
 
+if app is not None:
+    @app.route('/' + API_TOKEN, methods=['POST'])
+    async def get_message():
+        update = Update.to_object(request.stream.read().decode("utf-8"))
+        global updates
+        if update.update_id not in updates:
+            updates[update.update_id] = update
+            await dp.process_update(update)
+        return "OK", 200
+
+
 if __name__ == '__main__':
     logging.info('Запуск приложения..')
     if CONNECTION_TYPE == 'polling':
@@ -82,11 +102,12 @@ if __name__ == '__main__':
         # app.on_startup.append(on_startup)
         # dp.loop.set_task_factory(context.task_factory)
         # web.run_app(app, host='0.0.0.0', port=os.getenv('PORT'))
-        start_webhook(
-            dispatcher=dp,
-            webhook_path=WEBHOOK_PATH,
-            on_startup=on_startup,
-            on_shutdown=on_shutdown,
-            skip_updates=True,
-            host=WEBAPP_HOST,
-            port=WEBAPP_PORT,)
+        # start_webhook(
+        #     dispatcher=dp,
+        #     webhook_path=WEBHOOK_PATH,
+        #     on_startup=on_startup,
+        #     on_shutdown=on_shutdown,
+        #     skip_updates=True,
+        #     host=WEBAPP_HOST,
+        #     port=WEBAPP_PORT,)
+        app.run(host="0.0.0.0", port=int(os.environ.get('PORT', 5000)))
