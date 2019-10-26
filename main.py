@@ -16,10 +16,10 @@ WEBAPP_HOST = os.environ.get('WEBAPP_HOST')
 WEBAPP_PORT = int(os.environ.get('WEBAPP_PORT'))
 LOCAL_MODE = bool(int(os.environ.get('LOCAL_MODE', '0')))
 CONNECTION_TYPE = 'polling' if LOCAL_MODE else 'webhook'
+PROXY = os.environ.get('PROXY', 'socks5://127.0.0.1:9150')  # Tor proxy
 
 logging.basicConfig(level=logging.INFO)
-
-bot = Bot(token=API_TOKEN, proxy='socks5://127.0.0.1:9150')
+bot = Bot(token=API_TOKEN, **dict(proxy=PROXY) if LOCAL_MODE else {})
 User.bot = bot
 dp = Dispatcher(bot)
 
