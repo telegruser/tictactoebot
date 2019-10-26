@@ -24,6 +24,7 @@ from aiogram.dispatcher.webhook import SendMessage
 
 API_TOKEN = os.environ.get('API_TOKEN')
 WEBHOOK_HOST = os.environ.get('WEBHOOK_HOST')
+WEBHOOK_PATH = '/' + API_TOKEN
 WEBHOOK_URL = WEBHOOK_HOST + API_TOKEN
 # WEBAPP_HOST = os.environ.get('WEBAPP_HOST')
 # WEBAPP_PORT = int(os.environ.get('WEBAPP_PORT'))
