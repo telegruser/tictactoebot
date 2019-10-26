@@ -55,9 +55,10 @@ async def rooms(user: User):
         # Ветка для обработки события входа в комнату
         if user.state == RoomUserStatus.Entered:
             await user.show_control_message(
-                'Создание игры. Размер поля.',
-                'Выберите величину поля:',
-                InlineKeyboards.SetBoardScale)
+                'Выберите размеры поля:',
+                'В режиме одиночной игры будет использоваться указанная ширина поля. \n\n'
+                'В режиме многопользовательской игры будут использованы настройки первого из пары игроков.',
+                InlineKeyboards.SetBoardScale, Icons.Settings)
         # Ветка обработки нажатий InlineButton кнопок в комнате
         elif user.state == RoomUserStatus.PressedInlineButton:
             if user.button == InlineButtons.SetScaleCount3:
@@ -174,7 +175,7 @@ async def rooms(user: User):
             if user.button == InlineButtons.Cancel:
                 games.remove(user.game)
                 user.game = None
-                await user_to(Rooms.MenuSetBoardScale)
+                await user_to(Rooms.MenuSingleMultiPlayer)
 
     # Комната многопользовательской игры
     elif user.room == Rooms.GameMultiPlayer:
