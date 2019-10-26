@@ -1,9 +1,3 @@
-# from urllib.parse import urljoin
-
-from aiogram.contrib.middlewares.logging import LoggingMiddleware
-# from aiogram.types import Update
-# from flask import request, Flask
-
 from bot_types import User
 from rooms import rooms
 
@@ -12,22 +6,13 @@ import os
 
 from aiogram import Bot, Dispatcher, executor, types
 from aiogram.utils.executor import start_webhook
-from aiogram.dispatcher.webhook import SendMessage
-
-# import aiohttp
-# from aiohttp import web
-# from aiogram import Bot, Dispatcher, types
-# from aiogram.utils import context
-# from aiogram.dispatcher.webhook import get_new_configured_app
-# from lxml import etree
+from aiogram.contrib.middlewares.logging import LoggingMiddleware
 
 
 API_TOKEN = os.environ.get('API_TOKEN')
 WEBHOOK_HOST = os.environ.get('WEBHOOK_HOST')
 WEBHOOK_PATH = '/' + API_TOKEN
 WEBHOOK_URL = WEBHOOK_HOST + API_TOKEN
-# WEBAPP_HOST = os.environ.get('WEBAPP_HOST')
-# WEBAPP_PORT = int(os.environ.get('WEBAPP_PORT'))
 LOCAL_MODE = bool(int(os.environ.get('LOCAL_MODE', '0')))
 CONNECTION_TYPE = os.environ.get('CONNECTION_TYPE', None)
 if not CONNECTION_TYPE:
@@ -40,13 +25,6 @@ bot = Bot(token=API_TOKEN, proxy=PROXY) if LOCAL_MODE else Bot(API_TOKEN)
 User.bot = bot
 dp = Dispatcher(bot)
 dp.middleware.setup(LoggingMiddleware())
-# updates = {}
-# app = None
-
-
-# if CONNECTION_TYPE == 'webhook':
-#     app = Flask(__name__) if CONNECTION_TYPE == 'webhook' else None
-#     app.logger.disabled = True
 
 
 async def process_update(user, message, callback_data=None):
@@ -61,7 +39,6 @@ async def handle_message(message: types.Message):
     if message.message_id != user.control_message_id:
         await bot.delete_message(user.account_id, message.message_id)
     await process_update(user, message)
-    # return SendMessage(message.chat.id, message.text)
 
 
 @dp.callback_query_handler()
@@ -85,29 +62,13 @@ async def on_shutdown(d):
     logging.warning('Завершено')
 
 
-# if app is not None:
-#     @app.route('/' + API_TOKEN, methods=['POST'])
-#     async def get_message():
-#         update = Update.to_object(request.stream.read().decode("utf-8"))
-#         global updates
-#         if update.update_id not in updates:
-#             updates[update.update_id] = update
-#             await dp.process_update(update)
-#         return "OK", 200
-
-
 if __name__ == '__main__':
     logging.info('Запуск приложения..')
-    # SendMessage(ADMIN_ID, 'Запуск приложения')
     if CONNECTION_TYPE == 'polling':
         logging.info('Вариант подключения: polling.')
         executor.start_polling(dp, skip_updates=True)
     elif CONNECTION_TYPE == 'webhook':
         logging.info('Вариант подключения: webhook.')
-        # app = get_new_configured_app(dispatcher=dp, path=WEBHOOK_URL)
-        # app.on_startup.append(on_startup)
-        # dp.loop.set_task_factory(context.task_factory)
-        # web.run_app(app, host='0.0.0.0', port=os.getenv('PORT'))
         start_webhook(
             dispatcher=dp,
             webhook_path=WEBHOOK_PATH,
@@ -116,4 +77,3 @@ if __name__ == '__main__':
             skip_updates=True,
             host='0.0.0.0',
             port=int(os.getenv('PORT', 5000)))
-        # app.run(host="0.0.0.0", port=5000)

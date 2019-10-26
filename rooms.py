@@ -170,20 +170,12 @@ async def rooms(user: User):
                                                 f'Ваш знак: {game.user_symbol(user)}\n\nВаша очередь..',
                                                 make_inline_keyboard_from_board(user.game.board))
             else:
+                # Если сейчас ходит противник:
                 await user.show_control_message(f'Ход {game.step_number}',
                                                 f'Ваш знак: {game.user_symbol(user)}\n\nОчередь соперника.',
                                                 make_inline_keyboard_from_board(user.game.board))
 
         elif user.state == RoomUserStatus.PressedInlineButton:
-
-            # if user.button == ReplyKeyboardButtons.Cancel:
-            #     game = user.game
-            #     user1, user2 = game.players_queue.values()
-            #     games.remove(user.game)
-            #     user1.game = None
-            #     user2.game = None
-            #     await user_to_room(user1, Rooms.StartGame)
-            #     return await user_to_room(user2, Rooms.StartGame)
 
             if str(user.callback_data).startswith('board') and user.game.queue == user.game_queue:
                 board, x, y = user.callback_data.split('_')

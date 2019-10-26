@@ -88,7 +88,6 @@ class User:
                                    keyboard=None,
                                    icon=Icons.Nan,
                                    new=False,
-                                   delete_previous_control_message=True,
                                    breaking=False):
         """ Отправляет room_content следя за тем, что-бы оно было последним """
         full_text = f'{icon} <b>{title}</b>\n\n<i>{text}</i>'
@@ -115,8 +114,6 @@ class User:
                 edited = await self.bot.edit_message_text(
                     full_text, self.account_id, self.control_message_id, parse_mode='HTML', reply_markup=keyboard)
             except:
-                # pass
-            # if not edited:
                 await self.bot.delete_message(self.account_id, self.control_message_id)
                 new_room_content = await self.send_message(full_text, 'HTML', keyboard)
                 self.control_message_id = None if breaking else new_room_content.message_id
@@ -139,13 +136,8 @@ class User:
             self.call_message = message
         elif message is None:
             self.state = RoomUserStatus.Entered
-            # keys = rooms_keyboards.get(self.room, None)
-            # if message.text in [b. for b in keys.]
-            # elif message.text in [b.value for b in rooms_keyboards.get(self.room, {'buttons': []})['buttons']]:
         elif (message.text in [b for b in rooms_keyboards.get(self.room, {'buttons': []})] or
               message.text in [b.value for b in sum([list(b['buttons']) for b in global_keyboards], [])]):
-            # dct = {b.value: b for b in ReplyKeyboardButtons}
-            # btn = dct.get(message.text, None)
             self.button = {b.value: b for b in ReplyKeyboardButtons}.get(message.text, None)
             self.state = RoomUserStatus.PressedButton
         else:
@@ -196,8 +188,10 @@ class Board:
         return True if self[x][y] is None else False
 
     def choose_random_move(self, *moves):
-        # Возвращает случайный ход из полученного списка возможных ходов
-        # Возвращает None если ходов нет
+        """
+        Возвращает случайный ход из полученного списка возможных ходов.
+        Если ходов нет, возвращает None.
+        """
         legal_moves_set = set(self.legal_moves)
         moves_set = set(moves)
         try:
@@ -209,10 +203,6 @@ class Board:
     def set(self, x, y, value):
         self._board[x][y] = value
         self.step_number += 1
-        print('ПРОВЕРКА НА ВЫЙГРЫШЬ. ПОЛНАЯ ТАБЛИЦА ВЫГЛЯДИТ ТАК:')
-        for line in self._board:
-            print(line)
-        print('Проверка каждой линии..')
         return self.check(value)
 
     def check_diagonals(self, value):
@@ -365,7 +355,6 @@ class Game:
         """
         if self.board.set(x, y, self.queue):
             self.winner = self.queue
-            # return self.finish_game()
         elif len(self.board.legal_moves) == 0:
             self.winner = 0
         self.queue_reverse()
@@ -388,7 +377,6 @@ class Game:
                 self.winner = self.queue
                 return x, y
 
-        # self.queue_reverse()
         # Проверяем, может ли игрок выиграть на следющем ходу, чтобы заблокировать его
         for x, y in legal_moves:
             board = self.board.copy
@@ -396,21 +384,22 @@ class Game:
                 # self.queue_reverse()
                 return x, y
 
-        # self.queue_reverse()
-        return choice(self.board.legal_moves)
+        if self.board.count > 3:
+            return choice(self.board.legal_moves)
+
         # Попытаемся занять один из углов, если они свободны
-        # angles = (0, 0), (0, 2), (2, 0), (2, 2)
-        # xy = self.board.choose_random_move(self.queue, *angles)
-        # if xy is not None:
-        #     x, y = xy
-        #     return x, y
-        #
-        # # Занимаем центр, если он свободен
-        # if self.board.empty(1, 1):
-        #     return 1, 1
-        #
-        # # Занимаем одну из боковых клеток
-        # xy = self.board.choose_random_move(self.queue, (1, 0), (0, 1), (2, 1), (1, 2))
-        # if xy is not None:
-        #     x, y, = xy
-        #     return x, y
+        angles = (0, 0), (0, 2), (2, 0), (2, 2)
+        xy = self.board.choose_random_move(self.queue, *angles)
+        if xy is not None:
+            x, y = xy
+            return x, y
+
+        # Занимаем центр, если он свободен
+        if self.board.empty(1, 1):
+            return 1, 1
+
+        # Занимаем одну из боковых клеток
+        xy = self.board.choose_random_move(self.queue, (1, 0), (0, 1), (2, 1), (1, 2))
+        if xy is not None:
+            x, y, = xy
+            return x, y

@@ -51,15 +51,15 @@ class Icons:
 
 
 def reply_keyboard(*buttons, row_width=3):
+    """ Собирает по полученным кнопкам клавиатуру """
     kb = ReplyKeyboardMarkup(row_width=row_width, resize_keyboard=True)
     keys = [KeyboardButton(text=btn.value) for btn in buttons]
-    # for btn in buttons:
-    #     keys.append(KeyboardButton(text=btn.value))
     kb.add(*keys)
     return {'keyboard': kb, 'buttons': buttons}
 
 
 def button(text, icon=None):
+    """ Соединяет текст с иконкой """
     if icon is None:
         return text
     else:
@@ -67,12 +67,14 @@ def button(text, icon=None):
 
 
 def inline_button(text, icon=Icons.Nan, callback_data=None):
+    """ Собирает по полученным параметрам InlineKeyboardButton """
     text = f'{icon} {str(text)}'
     callback_data = str(text) if callback_data is None else callback_data
     return InlineKeyboardButton(text, callback_data=callback_data)
 
 
 def inline_keyboard(*buttons, row_width=2):
+    """ Собирает по полученным кнопкам InlineKeyboard """
     keyboard = InlineKeyboardMarkup()
     keyboard.row_width = row_width
     buttons = [b.value if isinstance(b, InlineButtons) else b for b in buttons]
@@ -81,10 +83,11 @@ def inline_keyboard(*buttons, row_width=2):
 
 
 class RoomUserStatus(Enum):
-    Entered = 0
-    SentMessage = 1
-    PressedInlineButton = 2
-    PressedButton = 3
+    """ События действий пользователя в комнате """
+    Entered = 0                 # пользователь входит в комнату
+    SentMessage = 1             # пользователь отправил сообщение
+    PressedInlineButton = 2     # пользователь нажал InlineButton
+    PressedButton = 3           # пользователь нажал ReplyKeyboardButton
 
 
 class InlineButtons(Enum):
@@ -101,6 +104,7 @@ class InlineButtons(Enum):
 
 
 def make_inline_keyboard_from_board(board):
+    """ Сборка InlineKeyboard из полученного состояния поля игры """
     buttons = []
     for x, line in enumerate(board):
         for y, item in enumerate(line):
@@ -135,15 +139,17 @@ class ReplyKeyboards:
 
 
 class Rooms(Enum):
+    """ Состояния пользователя (комнаты) """
     Start = 0
-    MenuSingleMultiPlayer = 2
-    MenuSetBoardScale = 3
-    WaitingPartner = 4
-    GameMultiPlayer = 5
-    GameSinglePlayer = 6
-    GameFinish = 7
+    MenuSingleMultiPlayer = 1
+    MenuSetBoardScale = 2
+    WaitingPartner = 3
+    GameMultiPlayer = 4
+    GameSinglePlayer = 5
+    GameFinish = 6
 
 
+# Отношения клавиатур к комнатам
 rooms_keyboards = {
     Rooms.MenuSingleMultiPlayer: InlineKeyboards.SingleMultiPlayer,
     Rooms.WaitingPartner: InlineKeyboards.Cancel,
@@ -151,4 +157,5 @@ rooms_keyboards = {
     Rooms.GameSinglePlayer: ReplyKeyboards.Off
 }
 
+# Клавиатуры, нажатия кнопок которых обрабатываются во всех комнатах
 global_keyboards = [ReplyKeyboards.Cancel]
