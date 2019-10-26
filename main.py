@@ -111,5 +111,5 @@ if __name__ == '__main__':
         #     skip_updates=True,
         #     host=WEBAPP_HOST,
         #     port=WEBAPP_PORT,)
-        app.run(host="0.0.0.0", port=int(os.environ.get('PORT', 5000)))
-    await bot.send_message(ADMIN_ID, 'Приложение запущено')
+        app.run(host="0.0.0.0", port=5000)
+    bot.send_message(ADMIN_ID, 'Приложение запущено')
