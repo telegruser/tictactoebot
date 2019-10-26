@@ -147,14 +147,14 @@ async def rooms(user: User):
             else:
                 title = 'Поражение.'
                 icon = Icons.Shrugging
-                text = 'Повезет в следующий раз!' if game.game_over else 'Вы отключлись от игры.'
+                text = 'Повезет в следующий раз!' if game.game_over \
+                    else 'Вы отключлись от игры.'
 
             await user.show_control_message(
                 title,
                 text,
                 make_inline_keyboard_from_board(user.game.board),
                 icon=icon,
-                new=True,
                 breaking=True)
 
             if game in games:
@@ -182,12 +182,14 @@ async def rooms(user: User):
             game = user.game
             if game.queue == user.game_queue:
                 # Если сейчас его ход:
-                await user.show_control_message(f'Ваш ход.. Ход №{game.step_number}',
+                await user.show_control_message(f'Ваш ход.. ',
+                                                f'Ход #{game.step_number}\n'
                                                 f'Ваш знак: {game.user_symbol(user)}\n\nВаша очередь..',
                                                 make_inline_keyboard_from_board(user.game.board), Icons.Baloon)
             else:
                 # Если сейчас ходит противник:
-                await user.show_control_message(f'Ход соперника.. Ход №{game.step_number}',
+                await user.show_control_message(f'Ход соперника..',
+                                                f'Ход #{game.step_number}\n'
                                                 f'Ваш знак: {game.user_symbol(user)}\n\nСоперник ходит..',
                                                 make_inline_keyboard_from_board(user.game.board), Icons.Wait)
 

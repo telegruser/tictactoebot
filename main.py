@@ -10,7 +10,7 @@ from aiogram.contrib.middlewares.logging import LoggingMiddleware
 
 
 API_TOKEN = os.environ.get('API_TOKEN')
-WEBHOOK_HOST = os.environ.get('WEBHOOK_HOST')
+WEBHOOK_HOST = os.environ.get('WEBHOOK_HOST', '')
 WEBHOOK_PATH = '/' + API_TOKEN
 WEBHOOK_URL = WEBHOOK_HOST + API_TOKEN
 LOCAL_MODE = bool(int(os.environ.get('LOCAL_MODE', '0')))
@@ -18,7 +18,6 @@ CONNECTION_TYPE = os.environ.get('CONNECTION_TYPE', None)
 if not CONNECTION_TYPE:
     CONNECTION_TYPE = 'polling' if LOCAL_MODE else 'webhook'
 PROXY = os.environ.get('PROXY', 'socks5://127.0.0.1:9150')  # Tor proxy
-ADMIN_ID = int(os.environ.get('ADMIN_ID'))
 
 logging.basicConfig(level=logging.INFO)
 bot = Bot(token=API_TOKEN, proxy=PROXY) if LOCAL_MODE else Bot(API_TOKEN)
